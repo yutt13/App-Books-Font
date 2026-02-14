@@ -62,7 +62,7 @@ export default function RegisterScreen() {
           </Text>
           <TextInput 
             className="w-full bg-white p-4 rounded-2xl border border-emerald-200 shadow-sm"
-            placeholder="เช่น สมชาย ใจดี"
+            placeholder="เช่น มานี มีนา"
             placeholderTextColor="#94a3b8"
             value={form.fullName}
             onChangeText={(text) => setForm({...form, fullName: text})}

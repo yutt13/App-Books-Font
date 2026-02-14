@@ -1,6 +1,6 @@
 // client/app/admin-login.tsx
 import { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, Alert } from 'react-native';
+import { View, Text, TextInput, TouchableOpacity, Alert, KeyboardAvoidingView, Platform, ScrollView } from 'react-native';
 import { router } from 'expo-router';
 import axios from 'axios';
 import { API_URL } from '../constants/api';
@@ -28,61 +28,76 @@ export default function AdminLogin() {
   };
 
   return (
-    <View className="flex-1 bg-emerald-50 justify-center px-6">
-      
-      <Text className="text-3xl font-semibold text-emerald-900 mb-2 text-center tracking-tight">
-        Admin Portal
-      </Text>
-
-      <Text className="text-emerald-600 mb-10 text-center">
-        ระบบจัดการห้องสมุด
-      </Text>
-
-      <View className="bg-white p-7 rounded-3xl shadow-xl border border-emerald-100">
+    // KeyboardAvoidingView ช่วยให้แป้นพิมพ์ไม่บังช่องกรอก
+    <KeyboardAvoidingView 
+      behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+      className="flex-1 bg-[#f8fafc]"
+    >
+      <ScrollView contentContainerStyle={{ flexGrow: 1, justifyContent: 'center' }} className="px-7">
         
-        <Text className="mb-2 font-medium text-emerald-800">
-          Username (Admin)
-        </Text>
-        <TextInput 
-          className="bg-emerald-50 p-4 rounded-2xl mb-5 border border-emerald-200 text-slate-800"
-          value={username}
-          onChangeText={setUsername}
-          autoCapitalize="none"
-          placeholder="กรอกชื่อผู้ใช้"
-          placeholderTextColor="#94a3b8"
-        />
-        
-        <Text className="mb-2 font-medium text-emerald-800">
-          Password
-        </Text>
-        <TextInput 
-          className="bg-emerald-50 p-4 rounded-2xl mb-8 border border-emerald-200 text-slate-800"
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-          placeholder="กรอกรหัสผ่าน"
-          placeholderTextColor="#94a3b8"
-        />
-
-        <TouchableOpacity 
-          className="bg-emerald-600 p-4 rounded-2xl shadow-md active:opacity-80"
-          onPress={handleLogin}
-        >
-          <Text className="text-white text-center font-semibold text-base tracking-wide">
-            เข้าสู่ระบบ Admin
+        <View className="mb-10 items-center">
+          <View className="w-20 h-20 bg-emerald-100 rounded-[28px] items-center justify-center mb-5 shadow-sm">
+             <Text className="text-4xl">🔐</Text>
+          </View>
+          <Text className="text-3xl font-bold text-[#064e3b] tracking-tighter">
+            Admin Portal
           </Text>
-        </TouchableOpacity>
-
-        <TouchableOpacity 
-          className="mt-6"
-          onPress={() => router.back()}
-        >
-          <Text className="text-center text-emerald-500 font-medium">
-            กลับหน้าหลัก
+          <Text className="text-slate-400 mt-2 font-medium text-center">
+            กรุณาเข้าสู่ระบบเพื่อจัดการคลังหนังสือ
           </Text>
-        </TouchableOpacity>
+        </View>
 
-      </View>
-    </View>
+        <View className="bg-white p-8 rounded-[35px] shadow-2xl shadow-emerald-900/10 border border-emerald-50/50">
+          
+          <View className="mb-6">
+            <Text className="mb-2 ml-1 font-bold text-xs text-emerald-800 uppercase tracking-[1px]">
+              Admin Username
+            </Text>
+            <TextInput 
+              className="bg-slate-50 p-4 rounded-[20px] border border-slate-100 text-slate-800 focus:border-emerald-200"
+              value={username}
+              onChangeText={setUsername}
+              autoCapitalize="none"
+              placeholder="Username"
+              placeholderTextColor="#cbd5e1"
+            />
+          </View>
+          
+          <View className="mb-8">
+            <Text className="mb-2 ml-1 font-bold text-xs text-emerald-800 uppercase tracking-[1px]">
+              Password
+            </Text>
+            <TextInput 
+              className="bg-slate-50 p-4 rounded-[20px] border border-slate-100 text-slate-800 focus:border-emerald-200"
+              secureTextEntry
+              value={password}
+              onChangeText={setPassword}
+              placeholder="••••••••"
+              placeholderTextColor="#cbd5e1"
+            />
+          </View>
+
+          <TouchableOpacity 
+            activeOpacity={0.8}
+            className="bg-emerald-600 py-4 rounded-[22px] shadow-lg shadow-emerald-600/20 items-center"
+            onPress={handleLogin}
+          >
+            <Text className="text-white font-bold text-lg tracking-wide">
+              Sign In to Dashboard
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity 
+            className="mt-8 self-center"
+            onPress={() => router.back()}
+          >
+            <Text className="text-slate-400 font-bold text-sm">
+              กลับสู่หน้าหลักสำหรับ <Text className="text-emerald-500">สมาชิก</Text>
+            </Text>
+          </TouchableOpacity>
+
+        </View>
+      </ScrollView>
+    </KeyboardAvoidingView>
   );
 }
