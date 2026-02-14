@@ -1,98 +1,142 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+// app/(tabs)/index.tsx
+import { View, Text, FlatList, TouchableOpacity, Image, ActivityIndicator, RefreshControl, Alert } from 'react-native';
+import { useState, useEffect, useCallback } from 'react';
+import axios from 'axios'; 
+import { API_URL } from '../../constants/api'; 
+import { currentUser } from '../../constants/user'; 
 
-import { HelloWave } from '@/components/hello-wave';
-import ParallaxScrollView from '@/components/parallax-scroll-view';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { Link } from 'expo-router';
-
-export default function HomeScreen() {
-  return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
-      headerImage={
-        <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Welcome!</ThemedText>
-        <HelloWave />
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({
-              ios: 'cmd + d',
-              android: 'cmd + m',
-              web: 'F12',
-            })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <Link href="/modal">
-          <Link.Trigger>
-            <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-          </Link.Trigger>
-          <Link.Preview />
-          <Link.Menu>
-            <Link.MenuAction title="Action" icon="cube" onPress={() => alert('Action pressed')} />
-            <Link.MenuAction
-              title="Share"
-              icon="square.and.arrow.up"
-              onPress={() => alert('Share pressed')}
-            />
-            <Link.Menu title="More" icon="ellipsis">
-              <Link.MenuAction
-                title="Delete"
-                icon="trash"
-                destructive
-                onPress={() => alert('Delete pressed')}
-              />
-            </Link.Menu>
-          </Link.Menu>
-        </Link>
-
-        <ThemedText>
-          {`Tap the Explore tab to learn more about what's included in this starter app.`}
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          {`When you're ready, run `}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-    </ParallaxScrollView>
-  );
+interface Book {
+  book_id: number;
+  title: string;
+  author: string;
+  cover_url: string;
+  status: 'available' | 'borrowed';
 }
 
-const styles = StyleSheet.create({
-  titleContainer: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 8,
-  },
-  stepContainer: {
-    gap: 8,
-    marginBottom: 8,
-  },
-  reactLogo: {
-    height: 178,
-    width: 290,
-    bottom: 0,
-    left: 0,
-    position: 'absolute',
-  },
-});
+export default function BookListScreen() {
+  const [books, setBooks] = useState<Book[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [refreshing, setRefreshing] = useState(false);
+
+  const fetchBooks = async () => {
+    try {
+      const response = await axios.get(`${API_URL}/books`);
+      setBooks(response.data);
+    } catch (error) {
+      console.error("Error fetching books:", error);
+    } finally {
+      setLoading(false);
+      setRefreshing(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchBooks();
+  }, []);
+
+  const onRefresh = useCallback(() => {
+    setRefreshing(true);
+    fetchBooks();
+  }, []);
+
+  const handleBorrow = async (bookId: number) => {
+    if (!currentUser.id) {
+        Alert.alert('แจ้งเตือน', 'กรุณาเข้าสู่ระบบใหม่');
+        return;
+    }
+
+    try {
+        const response = await axios.post(`${API_URL}/borrow`, {
+            member_id: currentUser.id,
+            book_id: bookId
+        });
+
+        if (response.data.success) {
+            Alert.alert('สำเร็จ', 'ยืมหนังสือสำเร็จ!');
+            fetchBooks();
+        }
+    } catch (error) {
+        Alert.alert('ผิดพลาด', 'ยืมไม่สำเร็จ หรือหนังสือถูกยืมไปแล้ว');
+    }
+  };
+
+  if (loading) {
+    return (
+      <View className="flex-1 justify-center items-center bg-emerald-50">
+        <ActivityIndicator size="large" color="#059669" />
+      </View>
+    );
+  }
+
+  return (
+    <View className="flex-1 bg-emerald-50 px-5 pt-6">
+      <FlatList
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
+        data={books}
+        keyExtractor={(item) => item.book_id.toString()}
+        refreshControl={
+          <RefreshControl 
+            refreshing={refreshing} 
+            onRefresh={onRefresh}
+            tintColor="#059669"
+          />
+        }
+        renderItem={({ item }) => (
+          <View className="bg-white p-5 rounded-2xl mb-5 shadow-md border border-emerald-100 flex-row">
+            
+            <Image 
+              source={{ uri: item.cover_url || 'https://placehold.co/100x150/png' }} 
+              className="w-20 h-28 rounded-xl bg-emerald-100"
+            />
+            
+            <View className="flex-1 ml-4 justify-between">
+              
+              <View>
+                <Text 
+                  className="text-base font-semibold text-emerald-900"
+                  numberOfLines={2}
+                >
+                  {item.title}
+                </Text>
+
+                <Text className="text-emerald-600 text-sm mt-1">
+                  ผู้แต่ง: {item.author}
+                </Text>
+                
+                <View
+                  className={`self-start px-3 py-1 rounded-full mt-3 ${
+                    item.status === 'available'
+                      ? 'bg-emerald-100'
+                      : 'bg-slate-200'
+                  }`}
+                >
+                  <Text
+                    className={`text-xs font-semibold ${
+                      item.status === 'available'
+                        ? 'text-emerald-700'
+                        : 'text-slate-600'
+                    }`}
+                  >
+                    {item.status === 'available' ? 'ว่าง' : 'ถูกยืมแล้ว'}
+                  </Text>
+                </View>
+              </View>
+
+              {item.status === 'available' && (
+                <TouchableOpacity 
+                  className="bg-emerald-600 py-2 px-5 rounded-full mt-4 self-start active:opacity-80"
+                  onPress={() => handleBorrow(item.book_id)}
+                >
+                  <Text className="text-white font-semibold text-sm">
+                    ยืมหนังสือ
+                  </Text>
+                </TouchableOpacity>
+              )}
+            </View>
+          </View>
+        )}
+      />
+    </View>
+  );
+}

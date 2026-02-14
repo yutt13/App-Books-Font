@@ -1,27 +1,25 @@
-// app/(tabs)/_layout.tsx
+// client/app/(admin)/_layout.tsx
 import { Tabs } from 'expo-router';
 import { Ionicons } from '@expo/vector-icons';
 import "../../global.css";
 
-export default function TabsLayout() {
+export default function AdminLayout() {
   return (
     <Tabs
       screenOptions={{
-        headerShown: true,
         headerStyle: {
-          backgroundColor: '#ecfdf5', // เขียวอ่อน minimal
+          backgroundColor: '#ecfdf5', // เขียวอ่อนแบบ minimal
           shadowColor: 'transparent',
           elevation: 0,
         },
-        headerTintColor: '#065f46',
+        headerTintColor: '#065f46', // เขียวเข้มอ่านง่าย
         headerTitleStyle: {
           fontWeight: '600',
           fontSize: 18,
         },
 
-        tabBarActiveTintColor: '#059669',
-        tabBarInactiveTintColor: '#94a3b8',
-
+        tabBarActiveTintColor: '#059669', // เขียว modern
+        tabBarInactiveTintColor: '#94a3b8', // เทา soft
         tabBarStyle: {
           height: 70,
           paddingBottom: 12,
@@ -33,45 +31,39 @@ export default function TabsLayout() {
           shadowOpacity: 0.05,
           shadowRadius: 8,
         },
-
         tabBarLabelStyle: {
           fontSize: 12,
           fontWeight: '500',
         },
       }}
     >
-      {/* Tab 1: รายการหนังสือ */}
       <Tabs.Screen
         name="index"
         options={{
-          title: 'รายการหนังสือ',
-          tabBarLabel: 'หน้าแรก',
+          title: 'จัดการสมาชิก',
+          tabBarLabel: 'สมาชิก',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="library" size={size} color={color} />
+            <Ionicons name="people" size={size} color={color} />
           ),
         }}
       />
-
-      {/* Tab 2: คืนหนังสือ */}
       <Tabs.Screen
-        name="return"
+        name="add-book"
         options={{
-          title: 'คืนหนังสือ',
-          tabBarLabel: 'คืนหนังสือ',
+          title: 'เพิ่มหนังสือ',
+          tabBarLabel: 'เพิ่มหนังสือ',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="return-down-back" size={size} color={color} />
+            <Ionicons name="add-circle" size={size} color={color} />
           ),
         }}
       />
-
-      {/* Tab 3: ประวัติ */}
       <Tabs.Screen
-        name="history"
+        name="borrowed-list"
         options={{
-          title: 'ประวัติการยืม',
-          tabBarLabel: 'ประวัติ',
+          title: 'รายการยืมค้าง',
+          tabBarLabel: 'กำลังยืม',
           tabBarIcon: ({ color, size }) => (
-            <Ionicons name="time" size={size} color={color} />
+            <Ionicons name="list" size={size} color={color} />
           ),
         }}
       />
